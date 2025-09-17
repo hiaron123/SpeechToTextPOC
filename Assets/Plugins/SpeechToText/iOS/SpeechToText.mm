@@ -23,12 +23,20 @@
 static NSString *speechRecognizerLanguage;
 static SFSpeechRecognizer *speechRecognizer;
 static SFSpeechAudioBufferRecognitionRequest *recognitionRequest;
+static NSArray<NSString *> *keywordHints;
 static SFSpeechRecognitionTask *recognitionTask;
 static int recognitionTaskErrorCode;
 static NSTimer *recognitionTimeoutTimer;
 static AVAudioEngine *audioEngine;
 static float audioRmsdB;
 
++ (void)setKeywordHints:(NSArray<NSString *> *)hints {
+    keywordHints = hints;
+}
+
++ (NSArray<NSString *> *)keywordHints {
+    return keywordHints;
+}
 + (int)initialize:(NSString *)language
 {
 	if( @available(iOS 10.0, *) )
@@ -89,7 +97,14 @@ static float audioRmsdB;
 		NSLog( @"Couldn't create an instance of SFSpeechAudioBufferRecognitionRequest for speech recognition" );
 		return 0;
 	}
-	
+	#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
+    if (@available(iOS 13.0, *)) {
+
+  if( keywordHints != nil ) {
+      recognitionRequest.contextualStrings = keywordHints;
+  }
+    }
+    #endif
 	speechRecognizer.defaultTaskHint = useFreeFormLanguageModel ? SFSpeechRecognitionTaskHintDictation : SFSpeechRecognitionTaskHintSearch;
 	recognitionRequest.shouldReportPartialResults = YES;
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
@@ -97,6 +112,7 @@ static float audioRmsdB;
 	{
 		if( preferOfflineRecognition )
 			recognitionRequest.requiresOnDeviceRecognition = YES;
+
 	}
 #endif
 	
@@ -377,6 +393,23 @@ extern "C" int _SpeechToText_Initialize( const char* language )
 extern "C" int _SpeechToText_Start( int useFreeFormLanguageModel, int preferOfflineRecognition )
 {
 	return [USpeechToText start:( useFreeFormLanguageModel == 1 ) preferOfflineRecognition:( preferOfflineRecognition == 1 )];
+}
+extern "C" int _SpeechToText_StartWithKeywords(int useFreeFormLanguageModel, int preferOfflineRecognition, const char* keywordHints)
+{
+    NSArray<NSString*> *hintsArray = @[];
+    if (keywordHints != NULL && strlen(keywordHints) > 0)
+    {
+        NSString *hintsStr = [NSString stringWithUTF8String:keywordHints];
+        hintsArray = [hintsStr componentsSeparatedByString:@"||"];
+    }
+
+    [USpeechToText setKeywordHints:hintsArray];
+
+    int result = [USpeechToText start:(useFreeFormLanguageModel == 1)
+                 preferOfflineRecognition:(preferOfflineRecognition == 1)];
+
+  [USpeechToText setKeywordHints:nil];
+    return result;
 }
 
 extern "C" void _SpeechToText_Stop()

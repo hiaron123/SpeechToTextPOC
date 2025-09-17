@@ -5,10 +5,22 @@ using UnityEngine.UI;
 public class SpeechToTextManager : MonoBehaviour,ISpeechToTextListener
 {
 	public TMP_Text SpeechText;
-	public Button StartSpeechToTextButton, StopSpeechToTextButton;
+	public Button StartSpeechToTextButton, StopSpeechToTextButton,StartSpeechToTextButtonKeyWord;
 	public Slider VoiceLevelSlider;
 	public bool PreferOfflineRecognition;
 	private float normalizedVoiceLevel;
+	public string[] customKeywords = new string[] { "Arc Double",
+		"Arc Single",
+		"BAr Top",
+		"The Baron Portrait",
+		"The BAron Upright",
+		"Crown Bartop",
+		"Helix XT",
+		"Helix + Upright",
+		"King Max",
+		"MarsX Flex",
+		"MarsX Portrait",
+		"MarsX Slant" };
    void Start()
    {
       SpeechToText.Initialize("en-US");
@@ -26,6 +38,9 @@ public class SpeechToTextManager : MonoBehaviour,ISpeechToTextListener
 
       StartSpeechToTextButton.onClick.AddListener( StartSpeechToText );
       StopSpeechToTextButton.onClick.AddListener( StopSpeechToText );
+      #if !UNITY_EDITOR && UNITY_IOS
+      StartSpeechToTextButtonKeyWord.onClick.AddListener(StartSpeechToTextKeyword);
+#endif
    }
 
 private void Update()
@@ -58,7 +73,23 @@ private void Update()
 				SpeechText.text = "Permission is denied!";
 		} );
 	}
-
+	#if !UNITY_EDITOR && UNITY_IOS
+	public void StartSpeechToTextKeyword()
+	{
+		SpeechToText.RequestPermissionAsync( ( permission ) =>
+		{
+			if( permission == SpeechToText.Permission.Granted )
+			{
+				if( SpeechToText.StartWithKeywords( this,false ,preferOfflineRecognition: PreferOfflineRecognition , customKeywords) )
+					SpeechText.text = "";
+				else
+					SpeechText.text = "Couldn't start speech recognition session!";
+			}
+			else
+				SpeechText.text = "Permission is denied!";
+		} );
+	}
+#endif
 	public void StopSpeechToText()
 	{
 		SpeechToText.ForceStop();

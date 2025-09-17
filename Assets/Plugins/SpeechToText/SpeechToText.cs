@@ -106,10 +106,16 @@ public static class SpeechToText
 
 	[System.Runtime.InteropServices.DllImport( "__Internal" )]
 	private static extern void _SpeechToText_OpenSettings();
+
+[System.Runtime.InteropServices.DllImport("__Internal")]
+	private static extern int _SpeechToText_StartWithKeywords(int useFreeFormLanguageModel, int preferOfflineRecognition, string keywordHints);
+
+
 #elif UNITY_EDITOR
 	private static STTCallbackHelper speechSessionEmulator;
 	private static ISpeechToTextListener speechSessionEmulatorListener;
 #endif
+
 	#endregion
 
 	[RuntimeInitializeOnLoadMethod( RuntimeInitializeLoadType.AfterSceneLoad )]
@@ -286,6 +292,23 @@ public static class SpeechToText
 #endif
 	}
 
+#if  !UNITY_EDITOR && UNITY_IOS
+	public static bool StartWithKeywords(ISpeechToTextListener listener, bool useFreeFormLanguageModel = true, bool preferOfflineRecognition = false, string[] keywords = null)
+	{
+		string joined = keywords != null ? string.Join("||", keywords) : "";
+		if( _SpeechToText_StartWithKeywords(
+			useFreeFormLanguageModel ? 1 : 0,
+			preferOfflineRecognition ? 1 : 0,
+			joined
+		) == 1 )
+		{
+			STTInteractionCallbackiOS.Initialize( listener );
+			return true;
+		}
+
+		return false;
+	}
+#endif
 	/// <summary>
 	/// If a speech recognition session is in progress, stops it manually. Normally, a session is automatically stopped after the user stops speaking for a short while.
 	/// Note that on some Android versions, this call may have no effect (welcome to Android ecosystem): https://issuetracker.google.com/issues/158198432
@@ -364,3 +387,4 @@ public static class SpeechToText
 #endif
 	#endregion
 }
+
