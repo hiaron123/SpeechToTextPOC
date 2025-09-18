@@ -365,7 +365,7 @@ public static class SpeechToText
 	{
 		yield return new WaitForSecondsRealtime( 0.25f );
 
-		while( true )
+		while( speechSessionEmulatorListener != null )
 		{
 			speechSessionEmulatorListener.OnVoiceLevelChanged( Mathf.Clamp01( Mathf.PerlinNoise( Time.unscaledTime * 4f, Time.unscaledTime * -2f ) ) );
 
