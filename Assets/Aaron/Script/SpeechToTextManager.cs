@@ -10,7 +10,8 @@ using UnityEngine.XR.ARFoundation;
 
 public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
 {
-    [Header("Table And Prefab")] public GameObject TableContentGo;
+    [Header("Table And Prefab")]
+    public GameObject TableContentGo;
     public GameObject DataEntryPrefab;
     public Dictionary<string, GameObject> ExistingEntries = new Dictionary<string, GameObject>();
     public Slider VoiceRecordDurationSlider;
@@ -35,6 +36,16 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     bool onPartialResultReceivedSuccessParse = false;
 
 
+    void OnEnable()
+    {
+        ARSession.stateChanged += OnARSessionStateChanged;
+
+    }
+
+    void OnDisable()
+    {
+        ARSession.stateChanged -= OnARSessionStateChanged;
+    }
     void Start()
     {
         SpeechToText.Initialize("en-US");
@@ -49,28 +60,18 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
                 Debug.Log("Permission denied");
             }
         });
-        SpeechToText.Initialize("en-US");
 
         CheckARState();
+
 #if !UNITY_EDITOR&&UNITY_IOS
 	   StartSpeechToTextButtonKeyWord.GetComponent<ButtonConfigScript>().onStartSpeech.AddListener(StartSpeechToTextKeyword);
       StartSpeechToTextButtonKeyWord.GetComponent<ButtonConfigScript>().onStopSpeech.AddListener(StopSpeechToText);
 #endif
+        // Test in editor
 #if UNITY_EDITOR
         StartSpeechToTextButtonKeyWord.GetComponent<ButtonConfigScript>().onStartSpeech.AddListener(StartSpeechToText);
         StartSpeechToTextButtonKeyWord.GetComponent<ButtonConfigScript>().onStopSpeech.AddListener(StopSpeechToText);
 #endif
-    }
-
-    void OnEnable()
-    {
-        ARSession.stateChanged += OnARSessionStateChanged;
-
-    }
-
-    void OnDisable()
-    {
-        ARSession.stateChanged -= OnARSessionStateChanged;
     }
 
     private void OnGUI()
@@ -94,13 +95,11 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         //StartSpeechToTextButton.interactable = SpeechToText.IsServiceAvailable( PreferOfflineRecognition ) && !SpeechToText.IsBusy();
         //StartSpeechToTextButtonKeyWord.interactable = SpeechToText.IsServiceAvailable( PreferOfflineRecognition ) && !SpeechToText.IsBusy();
         //StopSpeechToTextButton.interactable = SpeechToText.IsBusy();
-
         // You may also apply some noise to the voice level for a more fluid animation (e.g. via Mathf.PerlinNoise)
         VoiceLevelSlider.value = Mathf.Lerp(VoiceLevelSlider.value, normalizedVoiceLevel, 15f * Time.unscaledDeltaTime);
         if (OnStartRecording)
         {
             VoiceRecordDurationSlider.value += 0.1f * Time.deltaTime;
-
         }
         else
         {
@@ -140,12 +139,6 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
                 Debug.Log("AR 已成功初始化並追蹤中！");
                 break;
         }
-    }
-
-    public void ChangeLanguage(string preferredLanguage)
-    {
-        if (!SpeechToText.Initialize(preferredLanguage))
-            SpeechText.text = "Couldn't initialize with language: " + preferredLanguage;
     }
 
     public void StartSpeechToText()
@@ -217,20 +210,10 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             { "parent", "baron" },
             { "barren", "baron" },
             { "barron", "baron" },
-            { "ark", "arc" },
-            { "arch", "arc" },
-            { "art", "arc" },
-            { "our", "arc" },
-            { "par", "bar" },
             { "brown", "crown" },
             { "clown", "crown" },
             { "partop", "bartop" },
             { "bar tap", "bartop" },
-            { "he licks", "helix" },
-            { "healix", "helix" },
-            { "plus", "+" },
-            { "extee", "xt" },
-            { "ecstee", "xt" },
             { "macs", "max" },
             { "macks", "max" },
             { "mar sex", "marsx" },
@@ -238,9 +221,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             { "mar six", "marsx" },
             { "marsex", "marsx" },
             { "flecks", "flex" },
-            { "flicks", "flex" },
-            { "plant", "slant" },
-            { "slent", "slant" }
+            { "flicks", "flex" }
         };
 
         string replacedValue = "";
@@ -285,7 +266,6 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
                 }
             }
         }
-
         // If no English number words found, look for actual digits
         if (string.IsNullOrEmpty(replacedValue))
         {
@@ -347,6 +327,13 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         // Return clean product name (for table) and quantity separately
         return (cleanProductName, replacedValue);
     }
+
+    public void ChangeLanguage(string preferredLanguage)
+    {
+        if (!SpeechToText.Initialize(preferredLanguage))
+            SpeechText.text = "Couldn't initialize with language: " + preferredLanguage;
+    }
+
 
     void ISpeechToTextListener.OnReadyForSpeech()
     {
