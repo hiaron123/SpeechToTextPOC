@@ -30,6 +30,7 @@ public class DistanceConverter : MonoBehaviour
     [Header("Spawning Cabinet")]
     [SerializeField] GameObject cabinetPrefab;
     [SerializeField] List<Color> cabinetColors;
+    [SerializeField] GameObject groupingPrefab;
     private int currentColorIndex = 0;
 
     void Start()
@@ -78,52 +79,58 @@ public class DistanceConverter : MonoBehaviour
     [Button]
     public void AddingCabinet(int quantity = 0)
     {
-       // get current direction facing
-         Vector3 forward = Camera.main.transform.forward;
-         Vector3 directionWithCabinetDistanceTo2D = forward * MapRealDistanceTo2D(cabinetDefaultDistanceFromPlayer);
-         if (!playerDot)
-             return;
 
-         // Defined the position 2D first
+ if (!playerDot)
+        return;
 
-         // use the following code if we want to use the tip of aim
-         // var aimingToWorld =
-         //     playerAimingTipReferencePoint.TransformPoint(playerAimingTipReferencePoint.anchoredPosition);
-         // var anchoredPosition = miniMapRectTransform.InverseTransformPoint(aimingToWorld);
-           var playToWorld =  playerDot.TransformPoint(playerDot.anchoredPosition);
-          var playerToMiniMapLocal = miniMapRectTransform.InverseTransformPoint(playToWorld);
-         var actualCabinetPosition2D = (Vector2)playerToMiniMapLocal + new Vector2(directionWithCabinetDistanceTo2D.x,
-                                           directionWithCabinetDistanceTo2D.z);
-         Debug.Log("Cabinet Position 2D: " + actualCabinetPosition2D);
-
-        // Spawn the grouping object
-        GameObject grouping = new GameObject("CabinetGroup", typeof(RectTransform));
-        grouping.transform.SetParent(miniMapRectTransform);
-        grouping.transform.localScale = Vector3.one;
-
-        grouping.GetComponent<RectTransform>().anchoredPosition = actualCabinetPosition2D;
-        var groupingHorizontalLayoutGroup = grouping.AddComponent<HorizontalLayoutGroup>();
-        groupingHorizontalLayoutGroup.childForceExpandHeight = false;
-        groupingHorizontalLayoutGroup.childForceExpandWidth = false;
-        groupingHorizontalLayoutGroup.childControlHeight = false;
-        groupingHorizontalLayoutGroup.childControlWidth = false;
-        groupingHorizontalLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
-        groupingHorizontalLayoutGroup.spacing = 0.1f;
+    RectTransform playerRect = playerDot.GetComponent<RectTransform>();
 
 
-        // Spawn the cabinets as children of grouping object in 2D minimap
-        for (int i = 0; i < quantity; i++)
-        {
-            var currentObj = Instantiate(cabinetPrefab,grouping.transform.position, Quaternion.identity,grouping.transform);
-            var img = currentObj.GetComponent<Image>();
-            img.color = cabinetColors[currentColorIndex];
-            currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
-        }
+    Vector2 cabinetOffsetLocal = Vector2.up * MapRealDistanceTo2D(cabinetDefaultDistanceFromPlayer);
 
-        // Rotation for the grouping object to face the player dot in minimap
-        var cabinGroupFaceDirection = (playerDot.transform.position - grouping.transform.position).normalized;
-        float angle = Mathf.Atan2(cabinGroupFaceDirection.y,cabinGroupFaceDirection.x) * Mathf.Rad2Deg -90;
-        grouping.GetComponent<RectTransform>().localEulerAngles = new Vector3(0, 0, angle);
+    Vector3 cabinetWorldPosition =  playerRect.TransformPoint(cabinetOffsetLocal);
 
+
+    Vector2 actualCabinetPosition2D = miniMapRectTransform.InverseTransformPoint(cabinetWorldPosition);
+
+    Debug.Log("Cabinet Position 2D: " + actualCabinetPosition2D);
+
+
+    GameObject grouping = Instantiate(groupingPrefab);
+
+    var groupingRec = grouping.GetComponent<RectTransform>();
+    grouping.transform.SetParent(miniMapRectTransform, false); // 'false' keeps local space correct
+    grouping.transform.localScale = Vector3.one;
+
+
+    // var groupingHorizontalLayoutGroup = grouping.AddComponent<HorizontalLayoutGroup>();
+    // groupingHorizontalLayoutGroup.childForceExpandHeight = false;
+    // groupingHorizontalLayoutGroup.childForceExpandWidth = false;
+    // groupingHorizontalLayoutGroup.childControlHeight = false;
+    // groupingHorizontalLayoutGroup.childControlWidth = false;
+    // groupingHorizontalLayoutGroup.childAlignment = TextAnchor.UpperLeft;
+    // groupingHorizontalLayoutGroup.spacing = 0.1f;
+
+    for (int i = 0; i < quantity; i++)
+    {
+        var currentObj = Instantiate(
+            cabinetPrefab,
+            grouping.transform.position,
+            Quaternion.identity,
+            grouping.transform
+        );
+
+        var img = currentObj.GetComponent<Image>();
+        img.color = cabinetColors[currentColorIndex];
+        currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
     }
+    // tweaking the position at the end because layout group expand to the right and we want to recenter it when it's done to get the correct center
+    //groupingRec.pivot = new Vector2(0.5f, 0.5f);
+
+    Debug.Log(actualCabinetPosition2D);
+    groupingRec.anchoredPosition = actualCabinetPosition2D;
+    groupingRec.rotation = playerRect.rotation;
+    }
+
+
 }

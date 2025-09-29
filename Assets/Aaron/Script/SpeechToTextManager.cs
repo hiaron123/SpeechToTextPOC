@@ -78,8 +78,8 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
 
     private void OnGUI()
     {
-        GUI.Label(new Rect(20, 200, 1000, 60), $"Position: {Camera.main.transform.position}",new GUIStyle(GUI.skin.label) { fontSize = 48, normal = { textColor = Color.white } });
-        GUI.Label(new Rect(20, 260, 1000, 60),$"Rotation: {Camera.main.transform.eulerAngles}",new GUIStyle(GUI.skin.label) { fontSize = 48, normal = { textColor = Color.white } });
+      //  GUI.Label(new Rect(20, 200, 1000, 60), $"Position: {Camera.main.transform.position}",new GUIStyle(GUI.skin.label) { fontSize = 48, normal = { textColor = Color.white } });
+      //  GUI.Label(new Rect(20, 260, 1000, 60),$"Rotation: {Camera.main.transform.eulerAngles}",new GUIStyle(GUI.skin.label) { fontSize = 48, normal = { textColor = Color.white } });
     }
 
     private void OnARSessionStateChanged(ARSessionStateChangedEventArgs args)

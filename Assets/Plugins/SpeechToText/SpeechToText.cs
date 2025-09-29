@@ -350,14 +350,14 @@ public static class SpeechToText
 			yield return new WaitForSecondsRealtime( 0.5f );
 			speechSessionEmulatorListener.OnBeginningOfSpeech();
 			yield return new WaitForSecondsRealtime( 0.33f );
-			speechSessionEmulatorListener.OnPartialResultReceived( "Arc" );
+			speechSessionEmulatorListener.OnPartialResultReceived( "baron" );
 			yield return new WaitForSecondsRealtime( 0.33f );
-			speechSessionEmulatorListener.OnPartialResultReceived( "Arc Double five" );
+			speechSessionEmulatorListener.OnPartialResultReceived( "baron upright 5" );
 			yield return new WaitForSecondsRealtime( 0.5f );
 		}
 		finally
 		{
-			StopEmulateSpeechOnEditor( "Arc Double five", null );
+			StopEmulateSpeechOnEditor( "baron upright 5", null );
 		}
 	}
 
