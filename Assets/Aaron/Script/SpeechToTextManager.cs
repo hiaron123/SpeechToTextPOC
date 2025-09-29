@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
@@ -35,7 +37,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     public string[] customKeywords = new string[] { };
     bool onPartialResultReceivedSuccessParse = false;
 
-
+    [Header("MiniMap")] public UnityEvent<int> onAddingCabinet;
     void OnEnable()
     {
         ARSession.stateChanged += OnARSessionStateChanged;
@@ -219,6 +221,9 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             { "mar sex", "marsx" },
             { "mars ex", "marsx" },
             { "mar six", "marsx" },
+            { "mass X", "marsx" },
+            { "mouse X", "marsx" },
+            { "mouse", "marsx" },
             { "marsex", "marsx" },
             { "flecks", "flex" },
             { "flicks", "flex" }
@@ -353,28 +358,28 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
 
     void ISpeechToTextListener.OnPartialResultReceived(string spokenText)
     {
-        Debug.Log("OnPartialResultReceived: " + spokenText);
-        SpeechText.text = spokenText;
-
-        var (processedText, replacedValue) = ReformatTextAfterStop(spokenText);
-
-        // Check if we found a valid number first
-        if (string.IsNullOrEmpty(replacedValue))
-        {
-            // No quantity found, don't try to add to table
-            return;
-        }
-
-        var successParse = int.TryParse(replacedValue, out int qty);
-        if (successParse)
-        {
-            onPartialResultReceivedSuccessParse = true;
-            AddDataEntryToTable(processedText, qty);
-        }
-        else
-        {
-            SpeechText.text = "Failed to parse quantity. Please try again.";
-        }
+        // Debug.Log("OnPartialResultReceived: " + spokenText);
+        // SpeechText.text = spokenText;
+        //
+        // var (processedText, replacedValue) = ReformatTextAfterStop(spokenText);
+        //
+        // // Check if we found a valid number first
+        // if (string.IsNullOrEmpty(replacedValue))
+        // {
+        //     // No quantity found, don't try to add to table
+        //     return;
+        // }
+        //
+        // var successParse = int.TryParse(replacedValue, out int qty);
+        // if (successParse)
+        // {
+        //     onPartialResultReceivedSuccessParse = true;
+        //     AddDataEntryToTable(processedText, qty);
+        // }
+        // else
+        // {
+        //     SpeechText.text = "Failed to parse quantity. Please try again.";
+        // }
     }
 
     void ISpeechToTextListener.OnResultReceived(string spokenText, int? errorCode)
@@ -424,6 +429,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
                 var existingDataContent = ExistingEntries[spokenText].GetComponent<DataEntry>();
                 existingDataContent.CountText.text =
                     (int.Parse(existingDataContent.CountText.text) + quantity).ToString();
+                onAddingCabinet.Invoke(quantity);
                 return;
             }
 
@@ -439,7 +445,15 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             }
 
             ExistingEntries.Add(spokenText, newEntry);
+            onAddingCabinet.Invoke(quantity);
         }
+
+
+    }
+    [Button]
+    public void Test()
+    {
+        onAddingCabinet.Invoke(2);
     }
 }
 
