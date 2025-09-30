@@ -29,12 +29,12 @@ public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
 
     [Header("Spawning Cabinet")]
     [SerializeField] GameObject cabinetPrefab;
-
     [SerializeField] private GameObject podPrefab;
     [SerializeField] private GameObject backToBackPrefab;
     [SerializeField] List<Color> cabinetColors;
     [SerializeField] GameObject groupingPrefab;
     private int currentColorIndex = 0;
+
 
     void Start()
     {
@@ -109,28 +109,37 @@ public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
 
     switch (cabinetType)
     {
+
         case "side by side":
             for (int i = 0; i < quantity; i++)
             {
-                var currentObj = Instantiate(
+                var sideBySide = Instantiate(
                     cabinetPrefab,
                     grouping.transform.position,
                     Quaternion.identity,
                     grouping.transform
                 );
 
-                var img = currentObj.GetComponent<Image>();
+                var img = sideBySide.GetComponent<Image>();
                 img.color = cabinetColors[currentColorIndex];
                 currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
             }
             break;
         case"pod":
-
+            var pod = Instantiate(
+                podPrefab,
+                grouping.transform.position,
+                Quaternion.identity,
+                grouping.transform);
             break;
         case"back to back":
+            var backToBack = Instantiate(
+                backToBackPrefab,
+                grouping.transform.position,
+                Quaternion.identity,
+                grouping.transform);
             break;
         default:
-
             break;
     }
 

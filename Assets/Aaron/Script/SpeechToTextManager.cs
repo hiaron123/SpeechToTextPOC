@@ -12,12 +12,16 @@ using UnityEngine.XR.ARFoundation;
 
 public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
 {
+    [Header("Reference To cabinet type manager for checking")]
+    [SerializeField]CabinetTypeConditionManager cabinetTypeConditionManager;
+
     [Header("Table And Prefab")]
     public GameObject TableContentGo;
     public GameObject DataEntryPrefab;
     public Dictionary<string, GameObject> ExistingEntries = new Dictionary<string, GameObject>();
     public Slider VoiceRecordDurationSlider;
     public bool OnStartRecording;
+
     [Header("AR stuff")]
     public GameObject tutorialPanel;
     [SerializeField] private ARSession arSession;
@@ -50,7 +54,8 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     }
     void Start()
     {
-        SpeechToText.Initialize("en-US");
+        // before is en-US, the reason to change is only en-GB can say pod correctly, whoever reading this can check the pronunciation in different language
+        SpeechToText.Initialize("en-GB");
         SpeechToText.RequestPermissionAsync(permission =>
         {
             if (permission == SpeechToText.Permission.Granted)
@@ -202,10 +207,10 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         };
         var oftenMisheardEnglishNumberMap = new Dictionary<string, string>()
         {
-            { "to", "2" }, { "too", "2" }, { "for", "4" },
+            {"to","2"}, { "too", "2" }, { "for", "4" },
             { "ate", "8" }, { "free", "3" }, { "tree", "3" }, { "sex", "6" },
             { "sick", "6" }, { "won", "1" }, { "freight", "3" }, { "fate", "8" },
-            { "nite", "9" }, { "night", "9" }
+            { "nite", "9" }, { "night", "9"} , {"aid", "8"}
         };
         var oftenMisheardMapForProductName = new Dictionary<string, string>()
         {
@@ -222,11 +227,25 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             { "mars ex", "marsx" },
             { "mar six", "marsx" },
             { "mass X", "marsx" },
+            { "mass ex", "marsx" },
             { "mouse X", "marsx" },
             { "mouse", "marsx" },
             { "marsex", "marsx" },
+            { "max ex", "marsx" },
+            { "must ex", "marsx" },
+            { "mark x", "marsx" },
             { "flecks", "flex" },
-            { "flicks", "flex" }
+            { "flicks", "flex" },
+            {"freeport", "3 pod"},
+            {"pot", "pod"},
+            {"porn", "pod"},
+            {"sex porn" ,"six pod"},
+            {"export" ,"six pod"},
+            {"for pot","4 pod"},
+            {"for port","4 pod"},
+            {"four pot","4 pod"},
+            {"four port","4 pod"},
+            {"port","pod"}
         };
         var typeOfCabinet = new List<string>()
         {
@@ -237,7 +256,20 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         string cleanProductName = text; // Keep original casing for product names
         bool autoCorrectForMisheard = false;
         string cabinetType = "";
-        // First, try to find English number words
+        bool defaultCabinetType = false;
+        // Try often misheard word for product name (after number extraction)
+        foreach (var pair in oftenMisheardMapForProductName)
+        {
+            var matches = Regex.Matches(cleanProductName, @"\b" + pair.Key + @"\b", RegexOptions.IgnoreCase);
+            if (matches.Count > 0)
+            {
+                cleanProductName = Regex.Replace(cleanProductName, @"\b" + pair.Key + @"\b", pair.Value, RegexOptions.IgnoreCase).Trim();
+                cleanProductName = Regex.Replace(cleanProductName, @"\s+", " ");
+                autoCorrectForMisheard = true;
+                break; // Added missing break statement
+            }
+        }
+        //  try to find English number words
         foreach (var pair in numberMap)
         {
             // Use case-insensitive matching directly on original text
@@ -258,16 +290,22 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         // Then try often misheard words for number (only if no number found yet)
         if (string.IsNullOrEmpty(replacedValue))
         {
+
             foreach (var pair in oftenMisheardEnglishNumberMap)
             {
-                var matches = Regex.Matches(cleanProductName, @"\b" + pair.Key + @"\b", RegexOptions.IgnoreCase);
+                // before key must not be back, after can be back or end of string
+                //cleanProductName = "baron upright to back to back";
+                // pair.Key = "to";
+                // pair.Value = "2";
+                //cleanProductName = "baron upright 2 back to back";
+                var pattern = @"(?<!\bback\s+)" + Regex.Escape(pair.Key) + @"(?=\s*$|\s+(back|pod|side by side)\b)";
+                var matches = Regex.Matches(cleanProductName,  pattern , RegexOptions.IgnoreCase);
                 if (matches.Count > 0)
                 {
                     replacedValue = pair.Value;
 
                     // Remove the misheard word from the text for clean product name
-                    cleanProductName = Regex.Replace(cleanProductName, @"\b" + Regex.Escape(pair.Key) + @"\b", "",
-                        RegexOptions.IgnoreCase).Trim();
+                    cleanProductName = Regex.Replace(cleanProductName, pattern, "", RegexOptions.IgnoreCase).Trim();
                     // Avoid multiple spaces after removal
                     cleanProductName = Regex.Replace(cleanProductName, @"\s+", " ");
                     autoCorrectForMisheard = true;
@@ -291,30 +329,29 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             }
         }
 
-        // Try often misheard word for product name (after number extraction)
-        foreach (var pair in oftenMisheardMapForProductName)
+
+        if (!string.IsNullOrEmpty(replacedValue))
         {
-            var matches = Regex.Matches(cleanProductName, @"\b" + pair.Key + @"\b", RegexOptions.IgnoreCase);
-            if (matches.Count > 0)
+            foreach (var type in typeOfCabinet)
             {
-                cleanProductName = Regex.Replace(cleanProductName, @"\b" + pair.Key + @"\b", pair.Value, RegexOptions.IgnoreCase).Trim();
-                cleanProductName = Regex.Replace(cleanProductName, @"\s+", " ");
-                autoCorrectForMisheard = true;
-                break; // Added missing break statement
+                var matches = Regex.Matches(cleanProductName, @"\b" + type + @"\b", RegexOptions.IgnoreCase);
+                if (matches.Count > 0)
+                {
+                    cabinetType = type;
+                    cleanProductName = Regex.Replace(cleanProductName,@"\b" + type + @"\b", "", RegexOptions.IgnoreCase).Trim();
+                    cleanProductName = Regex.Replace(cleanProductName, @"\s+", " ");
+                    break;
+                }
             }
+
+            if (cabinetType == "")
+            {
+                cabinetType = "side by side";
+                defaultCabinetType = true;
+            }
+            Debug.Log("cabinetType : " + cabinetType);
         }
 
-        foreach (var type in typeOfCabinet)
-        {
-            var matches = Regex.Matches(cleanProductName, @"\b" + type + @"\b", RegexOptions.IgnoreCase);
-            if (matches.Count > 0)
-            {
-                cabinetType = type;
-                break;
-            }
-        }
-
-        cabinetType = cabinetType == "" ? "side by side" : cabinetType;
 
 
         // Perform check on the product name if it is within the keywords list
@@ -334,11 +371,16 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         {
             if (autoCorrectForMisheard)
             {
-                SpeechText.text = cleanProductName + " " + replacedValue + " →  (auto-corrected for misheard word)";
+                SpeechText.text = cleanProductName + " " + replacedValue + " "+ cabinetType +" →  (auto-corrected for misheard word)";
             }
             else
             {
-                SpeechText.text = cleanProductName + " " + replacedValue;
+                SpeechText.text = cleanProductName + " " + replacedValue +" "+ cabinetType ;
+            }
+
+            if (defaultCabinetType)
+            {
+                SpeechText.text = SpeechText.text + " (defaulted to 'side by side')";
             }
         }
         else
@@ -440,6 +482,20 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     {
         if (!string.IsNullOrEmpty(spokenText))
         {
+            // Check if the quantity is allowed for the cabinet type
+            foreach (var cabinetTypeCondition in cabinetTypeConditionManager.cabinetTypeConditions)
+            {
+                if(cabinetTypeCondition.cabinetType == cabinetType)
+                {
+                    if (!cabinetTypeCondition.CheckIfCanBePlaced(quantity))
+                    {
+                        SpeechText.text = $"This cabinet type '{cabinetType}' doesn't support this quantity.";
+                        return;
+                    }
+                    break; // Exit the loop once the relevant cabinet type is found
+                }
+            }
+
             // Check for existing entry using ContainsKey to avoid exceptions
             if (ExistingEntries.ContainsKey(spokenText))
             {
@@ -464,7 +520,6 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             ExistingEntries.Add(spokenText, newEntry);
             onAddingCabinet.Invoke(quantity, cabinetType);
         }
-
 
     }
     [Button]

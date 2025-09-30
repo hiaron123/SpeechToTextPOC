@@ -1467,6 +1467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e24be51335d6747e3890309afa74fcee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cabinetTypeConditionManager: {fileID: 1495824776}
   TableContentGo: {fileID: 779078811}
   DataEntryPrefab: {fileID: 2800588123125336278, guid: 682c9d140a09c404cb168337dc7062f2, type: 3}
   VoiceRecordDurationSlider: {fileID: 1346943883}
@@ -1489,6 +1490,9 @@ MonoBehaviour:
   - King Max
   - Marquis 3 reel
   - Neptune Double
+  - side by side
+  - back to back
+  - pod
   - one
   - two
   - three
@@ -1499,6 +1503,15 @@ MonoBehaviour:
   - eight
   - nine
   - ten
+  - four pod
+  - six pod
+  - three pod
+  - two back to back
+  - four back to back
+  - six back to back
+  - eight back to back
+  - ten back to back
+  - twelve back to back
   onAddingCabinet:
     m_PersistentCalls:
       m_Calls:
@@ -3429,7 +3442,7 @@ GameObject:
   - component: {fileID: 1111452976}
   - component: {fileID: 1111452978}
   m_Layer: 5
-  m_Name: MiniMap
+  m_Name: MiniMapManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3511,6 +3524,8 @@ MonoBehaviour:
   cabinetDefaultDistanceFromPlayer: 1
   realToMapScale: 120
   cabinetPrefab: {fileID: 507914389062768382, guid: 19a18f8b409e84e9b92420c326c06aab, type: 3}
+  podPrefab: {fileID: 1256756215958102191, guid: 1f0ee105502b24c449d6db108e7a68aa, type: 3}
+  backToBackPrefab: {fileID: 8769424792893307494, guid: e42491285a77e4a10821c3d9cd67c910, type: 3}
   cabinetColors:
   - {r: 1, g: 0.97981787, b: 0, a: 1}
   - {r: 0.5337461, g: 1, b: 0, a: 1}
@@ -4191,6 +4206,60 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1495824775
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1495824777}
+  - component: {fileID: 1495824776}
+  m_Layer: 0
+  m_Name: CabinetTypeConditionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1495824776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495824775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ce0ffd40c414b75b292caf5fccad475, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cabinetTypeConditions:
+  - cabinetType: side by side
+    quantity: 010000000200000003000000040000000500000006000000
+    prefabForThisQuantity: []
+  - cabinetType: back to back
+    quantity: 020000000400000006000000080000000a0000000c000000
+    prefabForThisQuantity: []
+  - cabinetType: pod
+    quantity: 03000000040000000600000008000000
+    prefabForThisQuantity: []
+--- !u!4 &1495824777
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495824775}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 314.126, y: 724.31036, z: -0.49202096}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1509059678
 GameObject:
   m_ObjectHideFlags: 0
@@ -5745,6 +5814,7 @@ SceneRoots:
   - {fileID: 883023838}
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 1495824777}
   - {fileID: 1267631642}
   - {fileID: 1038341112}
   - {fileID: 1302947789}
