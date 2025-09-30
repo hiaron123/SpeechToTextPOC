@@ -37,7 +37,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     public string[] customKeywords = new string[] { };
     bool onPartialResultReceivedSuccessParse = false;
 
-    [Header("MiniMap")] public UnityEvent<int> onAddingCabinet;
+    [Header("MiniMap")] public UnityEvent<int, string> onAddingCabinet;
     void OnEnable()
     {
         ARSession.stateChanged += OnARSessionStateChanged;
@@ -192,7 +192,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         OnStartRecording = false;
     }
 
-    public (string processedText, string replacedValue) ReformatTextAfterStop(string text)
+    public (string processedText, string replacedValue, string processedCabinetType) ReformatTextAfterStop(string text)
     {
         var numberMap = new Dictionary<string, string>()
         {
@@ -200,7 +200,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             { "four", "4" }, { "five", "5" }, { "six", "6" }, { "seven", "7" },
             { "eight", "8" }, { "nine", "9" }, { "ten", "10" }
         };
-        var oftenMisheardMap = new Dictionary<string, string>()
+        var oftenMisheardEnglishNumberMap = new Dictionary<string, string>()
         {
             { "to", "2" }, { "too", "2" }, { "for", "4" },
             { "ate", "8" }, { "free", "3" }, { "tree", "3" }, { "sex", "6" },
@@ -228,11 +228,15 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             { "flecks", "flex" },
             { "flicks", "flex" }
         };
+        var typeOfCabinet = new List<string>()
+        {
+            "side by side", "pod", "back to back"
+        };
 
         string replacedValue = "";
         string cleanProductName = text; // Keep original casing for product names
         bool autoCorrectForMisheard = false;
-
+        string cabinetType = "";
         // First, try to find English number words
         foreach (var pair in numberMap)
         {
@@ -254,7 +258,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         // Then try often misheard words for number (only if no number found yet)
         if (string.IsNullOrEmpty(replacedValue))
         {
-            foreach (var pair in oftenMisheardMap)
+            foreach (var pair in oftenMisheardEnglishNumberMap)
             {
                 var matches = Regex.Matches(cleanProductName, @"\b" + pair.Key + @"\b", RegexOptions.IgnoreCase);
                 if (matches.Count > 0)
@@ -300,6 +304,19 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             }
         }
 
+        foreach (var type in typeOfCabinet)
+        {
+            var matches = Regex.Matches(cleanProductName, @"\b" + type + @"\b", RegexOptions.IgnoreCase);
+            if (matches.Count > 0)
+            {
+                cabinetType = type;
+                break;
+            }
+        }
+
+        cabinetType = cabinetType == "" ? "side by side" : cabinetType;
+
+
         // Perform check on the product name if it is within the keywords list
         if (customKeywords.Length > 0 && !string.IsNullOrEmpty(replacedValue))
         {
@@ -308,7 +325,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             if (!isValidKeyword)
             {
                 SpeechText.text = "Product name '" + cleanProductName + "' not recognized in keywords list.";
-                return ("", "");
+                return ("", "","");
             }
         }
 
@@ -330,7 +347,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         }
 
         // Return clean product name (for table) and quantity separately
-        return (cleanProductName, replacedValue);
+        return (cleanProductName, replacedValue, cabinetType);
     }
 
     public void ChangeLanguage(string preferredLanguage)
@@ -393,19 +410,19 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             return;
         }
 
-        var (processedText, replacedValue) = ReformatTextAfterStop(spokenText);
+        var (returnedProcessedText, returnedReplacedValue, returnedProcessedCabinetType) = ReformatTextAfterStop(spokenText);
 
         // Check if we found a valid number first
-        if (string.IsNullOrEmpty(replacedValue))
+        if (string.IsNullOrEmpty(returnedReplacedValue))
         {
             // No quantity found, don't try to add to table
             return;
         }
 
-        var successParse = int.TryParse(replacedValue, out int qty);
+        var successParse = int.TryParse(returnedReplacedValue, out int qty);
         if (successParse)
         {
-            AddDataEntryToTable(processedText, qty);
+            AddDataEntryToTable(returnedProcessedText, qty, returnedProcessedCabinetType);
         }
         else
         {
@@ -419,7 +436,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         //   errorCode is 6, then the user hasn't spoken and the session has timed out as expected).
     }
 
-    public void AddDataEntryToTable(string spokenText, int quantity)
+    public void AddDataEntryToTable(string spokenText, int quantity, string cabinetType = "side by side")
     {
         if (!string.IsNullOrEmpty(spokenText))
         {
@@ -429,7 +446,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
                 var existingDataContent = ExistingEntries[spokenText].GetComponent<DataEntry>();
                 existingDataContent.CountText.text =
                     (int.Parse(existingDataContent.CountText.text) + quantity).ToString();
-                onAddingCabinet.Invoke(quantity);
+                onAddingCabinet.Invoke(quantity, cabinetType);
                 return;
             }
 
@@ -445,7 +462,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             }
 
             ExistingEntries.Add(spokenText, newEntry);
-            onAddingCabinet.Invoke(quantity);
+            onAddingCabinet.Invoke(quantity, cabinetType);
         }
 
 
@@ -453,7 +470,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     [Button]
     public void Test()
     {
-        onAddingCabinet.Invoke(2);
+        //onAddingCabinet.Invoke(2);
     }
 }
 
