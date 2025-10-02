@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
@@ -5,6 +6,9 @@ using UnityEngine.UI;
 
 public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
 {
+
+    [Header("Reference To cabinet type manager for checking")]
+    [SerializeField]CabinetTypeConditionManager cabinetTypeConditionManager;
 
     [Header("Player Dot stuff")]
     public RectTransform playerDot;
@@ -29,7 +33,7 @@ public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
 
     [Header("Spawning Cabinet")]
     [SerializeField] GameObject cabinetPrefab;
-    [SerializeField] private GameObject podPrefab;
+    //[SerializeField] private List<GameObject> podPrefab; // index 0 is 3 pod, 1 is 4 pod, 2 is 6 pod, 3 is 8 pod
     [SerializeField] private GameObject backToBackPrefab;
     [SerializeField] List<Color> cabinetColors;
     [SerializeField] GameObject groupingPrefab;
@@ -126,18 +130,30 @@ public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
             }
             break;
         case"pod":
-            var pod = Instantiate(
-                podPrefab,
-                grouping.transform.position,
-                Quaternion.identity,
-                grouping.transform);
+            // grabbing the quantity index, then use it to find the prefab. because they are ascending order so it works
+            // int index = Array.IndexOf(cabinetTypeConditionManager.cabinetTypeConditions[2].quantity, quantity);
+            // var pod = Instantiate(
+            //     cabinetTypeConditionManager.cabinetTypeConditions[2].prefabForThisQuantity[index],
+            //     grouping.transform.position,
+            //     Quaternion.identity,
+            //     grouping.transform);
             break;
         case"back to back":
-            var backToBack = Instantiate(
-                backToBackPrefab,
-                grouping.transform.position,
-                Quaternion.identity,
-                grouping.transform);
+            //for (int i = 0; i < quantity/2; i++)
+            {
+                var backToBack = Instantiate(
+                        backToBackPrefab,
+                        grouping.transform.position,
+                        Quaternion.identity,
+                        grouping.transform);
+
+                // var img = backToBack.GetComponentsInChildren<Image>();
+                // img[0].color = cabinetColors[currentColorIndex];
+                // currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
+                // img[1].color = cabinetColors[currentColorIndex];
+                // currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
+            }
+
             break;
         default:
             break;

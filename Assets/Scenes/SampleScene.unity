@@ -1479,17 +1479,17 @@ MonoBehaviour:
   VoiceLevelSlider: {fileID: 1602638629}
   PreferOfflineRecognition: 1
   customKeywords:
+  - Marquis
+  - Marquis 3 reel
   - Baron Portrait
   - Baron Upright
   - MarsX Portrait
   - MarsX Upright
   - MarsX Flex
   - Neptune Single
-  - Marquis
+  - Neptune Double
   - Crown Bartop
   - King Max
-  - Marquis 3 reel
-  - Neptune Double
   - side by side
   - back to back
   - pod
@@ -1503,9 +1503,10 @@ MonoBehaviour:
   - eight
   - nine
   - ten
+  - three pod
   - four pod
   - six pod
-  - three pod
+  - eight pod
   - two back to back
   - four back to back
   - six back to back
@@ -3518,13 +3519,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a302e99c5909c476aa6ea2bbb9d887e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cabinetTypeConditionManager: {fileID: 1495824776}
   playerDot: {fileID: 437818495}
   playerAimingTipReferencePoint: {fileID: 2076788052}
   miniMapRectTransform: {fileID: 1111452975}
   cabinetDefaultDistanceFromPlayer: 1
   realToMapScale: 120
   cabinetPrefab: {fileID: 507914389062768382, guid: 19a18f8b409e84e9b92420c326c06aab, type: 3}
-  podPrefab: {fileID: 1256756215958102191, guid: 1f0ee105502b24c449d6db108e7a68aa, type: 3}
+  podPrefab: []
   backToBackPrefab: {fileID: 8769424792893307494, guid: e42491285a77e4a10821c3d9cd67c910, type: 3}
   cabinetColors:
   - {r: 1, g: 0.97981787, b: 0, a: 1}
@@ -4244,7 +4246,11 @@ MonoBehaviour:
     prefabForThisQuantity: []
   - cabinetType: pod
     quantity: 03000000040000000600000008000000
-    prefabForThisQuantity: []
+    prefabForThisQuantity:
+    - {fileID: 1256756215958102191, guid: 1f0ee105502b24c449d6db108e7a68aa, type: 3}
+    - {fileID: 1256756215958102191, guid: 50c9050bbdaa74420b2edc34312f4b63, type: 3}
+    - {fileID: 1256756215958102191, guid: c38b1ebcfcc6b4f748426edb15c174f9, type: 3}
+    - {fileID: 1256756215958102191, guid: c07f665dd336a4db28d8d954120eb5d5, type: 3}
 --- !u!4 &1495824777
 Transform:
   m_ObjectHideFlags: 0
@@ -4539,7 +4545,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 375, y: -796}
+  m_AnchoredPosition: {x: 375, y: -752}
   m_SizeDelta: {x: 750, y: 307.0955}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1576521625
@@ -4627,7 +4633,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -532.0656, w: 161.86786}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
