@@ -131,15 +131,16 @@ public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
             break;
         case"pod":
             // grabbing the quantity index, then use it to find the prefab. because they are ascending order so it works
-            // int index = Array.IndexOf(cabinetTypeConditionManager.cabinetTypeConditions[2].quantity, quantity);
-            // var pod = Instantiate(
-            //     cabinetTypeConditionManager.cabinetTypeConditions[2].prefabForThisQuantity[index],
-            //     grouping.transform.position,
-            //     Quaternion.identity,
-            //     grouping.transform);
+            // currently only pod have prefabForThisQuantity because other two can be generated in runtime
+            int index = Array.IndexOf(cabinetTypeConditionManager.cabinetTypeConditions[2].quantity, quantity);
+            var pod = Instantiate(
+                cabinetTypeConditionManager.cabinetTypeConditions[2].prefabForThisQuantity[index],
+                grouping.transform.position,
+                Quaternion.identity,
+                grouping.transform);
             break;
         case"back to back":
-            //for (int i = 0; i < quantity/2; i++)
+            for (int i = 0; i < quantity/2; i++)
             {
                 var backToBack = Instantiate(
                         backToBackPrefab,
@@ -147,11 +148,13 @@ public class DistanceConverterAndMiniMapAndCabinet : MonoBehaviour
                         Quaternion.identity,
                         grouping.transform);
 
-                // var img = backToBack.GetComponentsInChildren<Image>();
-                // img[0].color = cabinetColors[currentColorIndex];
-                // currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
-                // img[1].color = cabinetColors[currentColorIndex];
-                // currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
+                // index should only be 0-1 since only two cube sprite in the prefab (for non parent object)
+
+                var img = backToBack.GetComponentsInChildren<Image>();
+                img[0].color = cabinetColors[currentColorIndex];
+                currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
+                img[1].color = cabinetColors[currentColorIndex];
+                currentColorIndex = (currentColorIndex + 1) % cabinetColors.Count;
             }
 
             break;

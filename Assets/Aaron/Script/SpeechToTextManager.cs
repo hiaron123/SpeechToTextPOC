@@ -154,6 +154,8 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
         {
             if (permission == SpeechToText.Permission.Granted)
             {
+               // ************************ Important ************************
+               // //preferOfflineRecognition if not support on certain device, it will debug Couldn't start speech recognition session
                 if (SpeechToText.Start(this, false, preferOfflineRecognition: PreferOfflineRecognition))
                 {
                     SpeechText.text = "";
@@ -172,6 +174,8 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
     {
         SpeechToText.RequestPermissionAsync((permission) =>
         {
+            // ************************ Important ************************
+            // //preferOfflineRecognition if not support on certain device, it will debug Couldn't start speech recognition session
             if (permission == SpeechToText.Permission.Granted)
             {
 #if !UNITY_EDITOR
@@ -239,6 +243,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             {"marcus","Marquis"},
             {"mark chis,","Marquis"},
             {"microsoft freeview", "Marquis 3 reel"},
+            { "Portrait", "Portrait" },
             {"freeport", "3 pod"},
             {"pot", "pod"},
             {"porn", "pod"},
@@ -247,8 +252,11 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
             {"for pot","4 pod"},
             {"for port","4 pod"},
             {"four pot","4 pod"},
+            {"four porn","4 pod"},
+            {"fort port","4 pod"},
             {"four port","4 pod"},
             {"teleport","10 pod"},
+            {"airport","8 pod"},
             {"port","pod"},
 
 
@@ -272,7 +280,7 @@ public class SpeechToTextManager : MonoBehaviour, ISpeechToTextListener
                 cleanProductName = Regex.Replace(cleanProductName, @"\b" + pair.Key + @"\b", pair.Value, RegexOptions.IgnoreCase).Trim();
                 cleanProductName = Regex.Replace(cleanProductName, @"\s+", " ");
                 autoCorrectForMisheard = true;
-                break; // Added missing break statement
+               // break; // Added missing break statement
             }
         }
         //  try to find English number words

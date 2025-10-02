@@ -1477,7 +1477,7 @@ MonoBehaviour:
   SpeechText: {fileID: 1576521625}
   StartSpeechToTextButtonKeyWord: {fileID: 773190231}
   VoiceLevelSlider: {fileID: 1602638629}
-  PreferOfflineRecognition: 1
+  PreferOfflineRecognition: 0
   customKeywords:
   - Marquis
   - Marquis 3 reel
@@ -1493,16 +1493,6 @@ MonoBehaviour:
   - side by side
   - back to back
   - pod
-  - one
-  - two
-  - three
-  - four
-  - five
-  - six
-  - seven
-  - eight
-  - nine
-  - ten
   - three pod
   - four pod
   - six pod
@@ -3526,7 +3516,6 @@ MonoBehaviour:
   cabinetDefaultDistanceFromPlayer: 1
   realToMapScale: 120
   cabinetPrefab: {fileID: 507914389062768382, guid: 19a18f8b409e84e9b92420c326c06aab, type: 3}
-  podPrefab: []
   backToBackPrefab: {fileID: 8769424792893307494, guid: e42491285a77e4a10821c3d9cd67c910, type: 3}
   cabinetColors:
   - {r: 1, g: 0.97981787, b: 0, a: 1}
@@ -4834,7 +4823,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90.183}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -454, y: 594}
+  m_AnchoredPosition: {x: -454, y: 551}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1602638629

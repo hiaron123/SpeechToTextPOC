@@ -357,7 +357,7 @@ public static class SpeechToText
 		}
 		finally
 		{
-			StopEmulateSpeechOnEditor( "Marcus 5 back to back", null );
+			StopEmulateSpeechOnEditor( "Marcus 8 pod", null );
 		}
 	}
 
